@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.nep</groupId>
+        <artifactId>nexus-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>nexus-category</artifactId>
+    <name>nexus-category</name>
+
+    <dependencies>
+        <!-- 引入通用公共模块 (通过依赖传递自动获取 Web/MyBatis-Plus/Lombok/Result 等) -->
+        <dependency>
+            <groupId>com.nep</groupId>
+            <artifactId>nexus-common</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
