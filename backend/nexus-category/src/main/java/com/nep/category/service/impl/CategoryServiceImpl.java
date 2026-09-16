@@ -1,11 +1,15 @@
 package com.nep.category.service.impl;
 
+import java.time.Duration;
 import java.util.List;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.nep.category.CategoryApiCode;
 import com.nep.category.entity.Category;
 import com.nep.category.mapper.CategoryMapper;
@@ -14,6 +18,7 @@ import com.nep.common.api.ApiCode;
 import com.nep.common.exception.BusinessException;
 import com.nep.common.page.PageQuery;
 import com.nep.common.page.PageResult;
+import com.nep.common.util.JsonUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +26,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper categoryMapper;
+    private final StringRedisTemplate stringRedisTemplate;
+
+    private static final String CACHE_KEY_ALL = "category:all";
+    private static final Duration CACHE_TTL = Duration.ofMinutes(30);
 
     /**
      * 获取所有分类，按排序顺序和ID升序排序
@@ -29,8 +38,16 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public List<Category> getAllCategories() {
+        String json = stringRedisTemplate.opsForValue().get(CACHE_KEY_ALL);
+        if (StringUtils.hasText(json)) {
+            return JsonUtils.fromJson(json, new TypeReference<List<Category>>() {
+            });
+        }
+        // 缓存中没有数据，从数据库查询
         List<Category> categories = categoryMapper.selectList(new LambdaQueryWrapper<Category>()
                 .orderByAsc(Category::getId));
+        // 将查询到的数据写回到 Redis
+        stringRedisTemplate.opsForValue().set(CACHE_KEY_ALL, JsonUtils.toJson(categories), CACHE_TTL);
         return categories;
     }
 
@@ -54,6 +71,8 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = new Category();
         category.setName(name);
         categoryMapper.insert(category);
+        // 清理旧缓存
+        stringRedisTemplate.delete(CACHE_KEY_ALL);
     }
 
     /**
@@ -94,6 +113,8 @@ public class CategoryServiceImpl implements CategoryService {
         category.setId(existCategory.getId());
         category.setName(name);
         categoryMapper.updateById(category);
+        // 清理旧缓存
+        stringRedisTemplate.delete(CACHE_KEY_ALL);
     }
 
     /**
@@ -111,6 +132,8 @@ public class CategoryServiceImpl implements CategoryService {
             throw new BusinessException(CategoryApiCode.CATEGORY_NOT_FOUND);
         }
         categoryMapper.deleteById(id);
+        // 清理旧缓存
+        stringRedisTemplate.delete(CACHE_KEY_ALL);
     }
 
     /**
