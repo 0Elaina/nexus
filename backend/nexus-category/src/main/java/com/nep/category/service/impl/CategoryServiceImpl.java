@@ -150,4 +150,22 @@ public class CategoryServiceImpl implements CategoryService {
         return PageResult.fromMpPage(page);
     }
 
+    /**
+     * 根据ID查询分类
+     * 
+     * @param id 分类ID
+     * @return 分类实体
+     */
+    @Override
+    public Category getCategoryById(Long id) {
+        if (id == null) {
+            throw new BusinessException(ApiCode.BAD_REQUEST, "分类 id 不能为空");
+        }
+        Category category = categoryMapper.selectById(id);
+        if (category == null) {
+            throw new BusinessException(CategoryApiCode.CATEGORY_NOT_FOUND);
+        }
+        return category;
+    }
+
 }

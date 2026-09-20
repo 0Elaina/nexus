@@ -7,11 +7,13 @@ import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nep.article.dto.ArticleCreateDTO;
 import com.nep.article.dto.ArticlePageQuery;
 import com.nep.article.entity.Article;
 import com.nep.article.mapper.ArticleMapper;
 import com.nep.article.service.ArticleService;
 import com.nep.article.vo.ArticleListItemVO;
+import com.nep.category.service.CategoryService;
 import com.nep.common.page.PageResult;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ArticleServiceImpl implements ArticleService {
     private final ArticleMapper articleMapper;
+    private final CategoryService categoryService;
 
     private static final String VIEW_COUNT = "viewCount";
     private static final String UPDATED_AT = "updatedAt";
@@ -72,6 +75,60 @@ public class ArticleServiceImpl implements ArticleService {
                 .currentPage(page.getCurrent())
                 .pageSize(page.getSize())
                 .build();
+    }
+
+    /**
+     * 创建文章
+     * 
+     * @param dto 文章创建DTO
+     * @return 创建的文章ID
+     */
+    @Override
+    public Long createArticle(ArticleCreateDTO dto) {
+        // 校验分类是否存在
+        categoryService.getCategoryById(dto.getCategoryId());
+        String summary = StringUtils.hasText(dto.getSummary())
+                ? dto.getSummary()
+                : extractSummary(dto.getContent());
+        Article article = new Article();
+        article.setTitle(dto.getTitle());
+        article.setSummary(summary);
+        article.setContent(dto.getContent());
+        article.setCategoryId(dto.getCategoryId());
+        article.setStatus(dto.getStatus());
+        article.setViewCount(0L);
+        articleMapper.insert(article);
+        return article.getId();
+    }
+
+    /**
+     * 从文章内容中提取纯文本摘要
+     * 
+     * @param content Markdown 源码
+     * @return 纯净文本摘要 (最多 150 字符)
+     */
+    private String extractSummary(String content) {
+        if (!StringUtils.hasText(content)) {
+            return "";
+        }
+        String plainText = content
+                // 1. 剔除多行代码块 ```...```
+                .replaceAll("```[\\s\\S]*?```", " ")
+                // 2. 剔除 LaTeX 块级公式 ($$ ... $$ 或 $$$ ... $$$)
+                .replaceAll("\\${2,}[\\s\\S]*?\\${2,}", " ")
+                // 3. 剔除行内图片 ![alt](url)
+                .replaceAll("!\\[[^\\]]*\\]\\([^\\)]*\\)", " ")
+                // 4. 将超链接 [文本](url) 降级为单纯的 "文本"
+                .replaceAll("\\[([^\\]]+)\\]\\([^\\)]*\\)", "$1")
+                // 5. 剔除 HTML 标签 <...> </...>
+                .replaceAll("<[^>]+>", " ")
+                // 6. 剔除行内公式定界符 $ 以及常见的 MD 语法标号 (# * > ` _ ~ | 等)
+                .replaceAll("[#*>`_~|\\[\\]\\$\\-\\+]", " ")
+                // 7. 将多个连续的换行、制表符、空格归一化为单个空格
+                .replaceAll("\\s+", " ")
+                .strip();
+
+        return plainText.length() > 150 ? plainText.substring(0, 150) + "..." : plainText;
     }
 
 }

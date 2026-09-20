@@ -17,6 +17,10 @@
             <groupId>com.nep</groupId>
             <artifactId>nexus-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.nep</groupId>
+            <artifactId>nexus-category</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
