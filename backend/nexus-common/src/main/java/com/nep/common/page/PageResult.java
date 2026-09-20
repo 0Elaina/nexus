@@ -1,5 +1,7 @@
 package com.nep.common.page;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -16,7 +18,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PageResult<T> {
+public class PageResult<T> implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    
     private List<T> records;
     private Long total;
     private Long currentPage;

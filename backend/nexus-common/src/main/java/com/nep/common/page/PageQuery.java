@@ -2,7 +2,8 @@ package com.nep.common.page;
 
 import lombok.Data;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.io.Serial;
+import java.io.Serializable;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
@@ -16,14 +17,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PageQuery {
+public class PageQuery implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Positive(message = "页码必须是正整数")
     private Long pageNum = 1L;
     @Positive(message = "每页数量必须是正整数")
     @Max(value = 100, message = "每页数量不能超过100")
     private Long pageSize = 10L;
-
-    public <T> Page<T> toMpPage() {
-        return new Page<>(pageNum, pageSize);
-    }
 }

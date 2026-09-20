@@ -15,6 +15,11 @@ const routes: RouteRecordRaw[] = [
                 path: 'categories',
                 name: 'admin-categories',
                 component: () => import('@/views/admin/CategoryManageView.vue')
+            },
+            {
+                path: 'articles',
+                name: 'admin-articles',
+                component: () => import('@/views/admin/ArticleManageView.vue')
             }
         ]
     }

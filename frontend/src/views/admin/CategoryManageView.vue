@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { h, onMounted, reactive, ref } from 'vue'
 import {
-  NBreadcrumb,
-  NBreadcrumbItem,
   NButton,
-  NCard,
   NDataTable,
   NForm,
   NFormItem,
@@ -18,6 +15,8 @@ import {
   type FormInst,
   type FormRules,
 } from 'naive-ui'
+import { motion } from 'motion-v'
+import { Plus } from 'lucide-vue-next'
 import {
   createCategory,
   deleteCategory,
@@ -27,6 +26,17 @@ import {
 } from '@/api/category'
 
 const message = useMessage()
+
+// ============================= 辅助函数 =============================
+
+/**
+ * 格式化 ISO 日期时间字符串，去除生硬的 T 分隔符与冗余秒数
+ * 例: "2026-09-20T08:13:01" -> "2026-09-20 08:13"
+ */
+function formatDateTime(val?: string) {
+  if (!val) return '-'
+  return val.replace('T', ' ').substring(0, 16)
+}
 
 // ============================= 核心状态 =============================
 
@@ -41,7 +51,7 @@ const paginationReactive = reactive({
   itemCount: 0,
   showSizePicker: true,
   pageSizes: [10, 20, 50],
-  prefix: (info: { itemCount?: number }) => `共 ${info.itemCount ?? 0} 条记录`,
+  prefix: (info: { itemCount?: number }) => `共 ${info.itemCount ?? 0} 个分类`,
 })
 
 // 弹窗表单状态
@@ -64,7 +74,7 @@ const formRules: FormRules = {
           return new Error('分类名称不能全为空格')
         }
         if (value.trim().length > 50) {
-          return new Error('分类名称最多50个字符')
+          return new Error('分类名称最多 50 个字符')
         }
         return true
       },
@@ -79,20 +89,22 @@ const columns: DataTableColumns<Category> = [
   {
     title: 'ID',
     key: 'id',
-    width: 90,
+    width: 70,
     render(row: Category) {
-      return h('span', { class: 'font-mono text-zinc-400 text-xs' }, row.id)
+      return h('span', { class: 'font-mono text-stone-400 text-xs' }, row.id)
     },
   },
   {
     title: '分类名称',
     key: 'name',
+    minWidth: 200,
     render(row: Category) {
       return h(
         NTag,
         {
           size: 'small',
           bordered: false,
+          type: 'info',
         },
         { default: () => row.name }
       )
@@ -101,41 +113,41 @@ const columns: DataTableColumns<Category> = [
   {
     title: '创建时间',
     key: 'createdAt',
-    width: 200,
+    width: 170,
     render(row: Category) {
-      return h('span', { class: 'text-zinc-500 font-mono text-xs' }, row.createdAt || '-')
+      return h('span', { class: 'text-stone-500 font-mono text-xs' }, formatDateTime(row.createdAt))
     },
   },
   {
     title: '更新时间',
     key: 'updatedAt',
-    width: 200,
+    width: 170,
     render(row: Category) {
-      return h('span', { class: 'text-zinc-500 font-mono text-xs' }, row.updatedAt || '-')
+      return h('span', { class: 'text-stone-500 font-mono text-xs' }, formatDateTime(row.updatedAt))
     },
   },
   {
     title: '操作',
     key: 'actions',
-    width: 160,
+    width: 130,
     align: 'right',
     render(row: Category) {
       return h(
         NSpace,
         { justify: 'end', align: 'center', size: 16 },
         () => [
-          // 编辑按钮：依托主题 primaryColor，不手写颜色魔法类
+          // 编辑按钮
           h(
             NButton,
             {
               text: true,
-              type: 'primary',
+              type: 'info',
               size: 'small',
               onClick: () => handleOpenEditModal(row),
             },
             { default: () => '编辑' }
           ),
-          // 气泡二次确认删除：依托主题 error 语义色，不手写 rose-600 类
+          // 气泡二次确认删除
           h(
             NPopconfirm,
             {
@@ -165,9 +177,6 @@ const columns: DataTableColumns<Category> = [
 
 // ============================= 接口与数据流 =============================
 
-/**
- * 获取分页数据 (对接后端 GET /api/categories/page)
- */
 async function loadCategoryPage() {
   loading.value = true
   try {
@@ -184,17 +193,11 @@ async function loadCategoryPage() {
   }
 }
 
-/**
- * 页码切换回调
- */
 function handlePageChange(page: number) {
   paginationReactive.page = page
   loadCategoryPage()
 }
 
-/**
- * 每页条数切换回调
- */
 function handlePageSizeChange(pageSize: number) {
   paginationReactive.pageSize = pageSize
   paginationReactive.page = 1
@@ -203,9 +206,6 @@ function handlePageSizeChange(pageSize: number) {
 
 // ============================= 弹窗与增改逻辑 =============================
 
-/**
- * 打开新建弹窗
- */
 function handleOpenCreateModal() {
   isEdit.value = false
   editId.value = null
@@ -213,9 +213,6 @@ function handleOpenCreateModal() {
   showModal.value = true
 }
 
-/**
- * 打开编辑弹窗
- */
 function handleOpenEditModal(row: Category) {
   isEdit.value = true
   editId.value = row.id
@@ -223,9 +220,6 @@ function handleOpenEditModal(row: Category) {
   showModal.value = true
 }
 
-/**
- * 提交表单保存 (支持新建 POST 与修改 PUT)
- */
 function handleSave() {
   formRef.value?.validate(async (errors: unknown) => {
     if (errors) return
@@ -249,9 +243,6 @@ function handleSave() {
   })
 }
 
-/**
- * 删除分类 (对接 DELETE /api/categories/{id})
- */
 async function handleDelete(id: number) {
   try {
     await deleteCategory(id)
@@ -271,36 +262,38 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto w-full space-y-6">
-    <!-- 原生面包屑组件替代手写 div/span -->
-    <NBreadcrumb>
-      <NBreadcrumbItem>管理中心</NBreadcrumbItem>
-      <NBreadcrumbItem>分类管理</NBreadcrumbItem>
-    </NBreadcrumb>
-
-    <!-- 页面标题与主操作区 (仅宏观 Flex 布局使用 Tailwind) -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-zinc-200/80">
+  <div class="max-w-5xl mx-auto w-full space-y-8">
+    
+    <!-- 页面标题与操作区 -->
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-black/5">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-zinc-900">分类管理</h1>
-        <p class="text-xs text-zinc-500 mt-1">维护文章的业务类别与聚合归档，支持高频新增、重命名与安全删除。</p>
+        <div class="font-mono text-xs font-semibold tracking-wider text-blue-600 uppercase mb-1">
+          CATEGORIES
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight text-stone-900 leading-snug">
+          分类管理
+        </h1>
+        <p class="text-xs text-stone-500 mt-1">
+          维护博客文章的业务分类归档，支持新增、重命名与安全删除。
+        </p>
       </div>
 
-      <!-- 纯语义驱动按钮：依托主题 primaryColor，移除硬编码 bg-zinc-900 / hover 等 -->
-      <NButton
-        type="primary"
-        @click="handleOpenCreateModal"
-      >
-        <template #icon>
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-          </svg>
-        </template>
-        新建分类
-      </NButton>
+      <!-- 新建分类按钮 -->
+      <motion.div :while-press="{ scale: 0.96 }">
+        <NButton
+          type="primary"
+          @click="handleOpenCreateModal"
+        >
+          <template #icon>
+            <Plus class="w-4 h-4" />
+          </template>
+          新建分类
+        </NButton>
+      </motion.div>
     </div>
 
-    <!-- 主表格卡片：完全依托 NCard 自身主题属性与边框系统，移除冗余覆盖类 -->
-    <NCard :bordered="true">
+    <!-- 主表格卡片：底部分页栏独立分隔并扩大行高与内边距 -->
+    <div class="glass-panel rounded-2xl overflow-hidden border border-white/70 shadow-sm">
       <NDataTable
         :columns="columns"
         :data="categoryList"
@@ -311,9 +304,9 @@ onMounted(() => {
         @update:page="handlePageChange"
         @update:page-size="handlePageSizeChange"
       />
-    </NCard>
+    </div>
 
-    <!-- 新建 / 编辑分类弹窗：依托 preset="card" 规范主题样式 -->
+    <!-- 新建 / 编辑分类弹窗 -->
     <NModal
       v-model:show="showModal"
       preset="card"
@@ -326,18 +319,18 @@ onMounted(() => {
         <NFormItem label="分类名称" path="name">
           <NInput
             v-model:value="formModel.name"
-            placeholder="请输入分类名称（如：系统设计、算法日记）"
+            placeholder="请输入分类名称（如：技术思考、生活随笔、读书笔记）"
             :maxlength="50"
             show-count
             clearable
             @keydown.enter.prevent="handleSave"
           />
         </NFormItem>
-        <p class="text-xs text-zinc-400 -mt-2">1 ~ 50 个字符，不可重名或全为空白符。</p>
+        <p class="text-xs text-stone-400 -mt-2">1 ~ 50 个字符，不可重名或全为空白符。</p>
       </NForm>
 
       <template #footer>
-        <div class="flex items-center justify-end gap-2.5">
+        <div class="flex items-center justify-end gap-3">
           <NButton :disabled="modalLoading" @click="showModal = false">
             取消
           </NButton>
@@ -351,5 +344,6 @@ onMounted(() => {
         </div>
       </template>
     </NModal>
+
   </div>
 </template>
