@@ -27,6 +27,17 @@ export interface ArticlePageQuery extends PageQuery {
 }
 
 /**
+ * 文章创建入参 DTO（对齐后端 ArticleCreateDTO 契约）
+ */
+export interface ArticleCreateDTO {
+    title: string;
+    content: string;
+    categoryId: number | string;
+    summary?: string;
+    status: number; // 0: 草稿, 1: 已发布
+}
+
+/**
  * 分页查询已发布文章列表 (面向前台访客，对齐 GET /api/articles/page)
  * 
  * @param query 分页与检索参数
@@ -51,5 +62,19 @@ export function adminPageQueryArticles(query: ArticlePageQuery): Promise<PageRes
         url: '/admin/articles/page',
         method: 'GET',
         params: query,
+    });
+}
+
+/**
+ * 管理端：创建并保存文章/草稿 (对齐 POST /api/admin/articles)
+ * 
+ * @param data 创建文章载荷
+ * @returns 新增的文章ID
+ */
+export function createArticle(data: ArticleCreateDTO): Promise<number | string> {
+    return request<number | string>({
+        url: '/admin/articles',
+        method: 'POST',
+        data,
     });
 }

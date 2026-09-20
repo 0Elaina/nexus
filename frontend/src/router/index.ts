@@ -14,12 +14,12 @@ const routes: RouteRecordRaw[] = [
             {
                 path: 'categories',
                 name: 'admin-categories',
-                component: () => import('@/views/admin/CategoryManageView.vue')
+                component: () => import('@/views/admin/category/index.vue')
             },
             {
                 path: 'articles',
                 name: 'admin-articles',
-                component: () => import('@/views/admin/ArticleManageView.vue')
+                component: () => import('@/views/admin/article/index.vue')
             }
         ]
     }
