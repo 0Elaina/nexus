@@ -7,13 +7,17 @@ import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nep.article.ArticleApiCode;
 import com.nep.article.dto.ArticleCreateDTO;
 import com.nep.article.dto.ArticlePageQuery;
 import com.nep.article.entity.Article;
 import com.nep.article.mapper.ArticleMapper;
 import com.nep.article.service.ArticleService;
+import com.nep.article.vo.ArticleDetailVO;
 import com.nep.article.vo.ArticleListItemVO;
+import com.nep.category.entity.Category;
 import com.nep.category.service.CategoryService;
+import com.nep.common.exception.BusinessException;
 import com.nep.common.page.PageResult;
 
 import lombok.RequiredArgsConstructor;
@@ -99,6 +103,23 @@ public class ArticleServiceImpl implements ArticleService {
         article.setViewCount(0L);
         articleMapper.insert(article);
         return article.getId();
+    }
+
+    /**
+     * 获取文章详情
+     * 
+     * @param articleId 文章ID
+     * @return 文章详情VO
+     * @throws IllegalArgumentException 如果文章不存在
+     */
+    @Override
+    public ArticleDetailVO getArticleDetail(Long id) {
+        Article article = articleMapper.selectById(id);
+        if (article == null) {
+            throw new BusinessException(ArticleApiCode.ARTICLE_NOT_FOUND);
+        }
+        Category category = categoryService.getCategoryById(article.getCategoryId());
+        return ArticleDetailVO.fromArticle(article, category.getName());
     }
 
     /**

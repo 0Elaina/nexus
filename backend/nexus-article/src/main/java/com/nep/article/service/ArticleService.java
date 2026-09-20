@@ -2,6 +2,7 @@ package com.nep.article.service;
 
 import com.nep.article.dto.ArticleCreateDTO;
 import com.nep.article.dto.ArticlePageQuery;
+import com.nep.article.vo.ArticleDetailVO;
 import com.nep.article.vo.ArticleListItemVO;
 import com.nep.common.page.PageResult;
 
@@ -21,4 +22,13 @@ public interface ArticleService {
      * @return 创建的文章ID
      */
     Long createArticle(ArticleCreateDTO dto);
+
+    /**
+     * 获取文章详情
+     * 
+     * @param articleId 文章ID
+     * @return 文章详情VO
+     * @throws IllegalArgumentException 如果文章不存在
+     */
+    ArticleDetailVO getArticleDetail(Long id);
 }
