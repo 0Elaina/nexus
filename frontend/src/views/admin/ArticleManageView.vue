@@ -19,7 +19,7 @@ import {
   RotateCcw,
   Search,
 } from 'lucide-vue-next'
-import { pageQueryArticles, type ArticleListItem } from '@/api/article'
+import { adminPageQueryArticles, type ArticleListItem } from '@/api/article'
 import { getAllCategories, type Category } from '@/api/category'
 
 const message = useMessage()
@@ -34,7 +34,14 @@ const categoryList = ref<Category[]>([])
 const filterForm = reactive({
   keyword: '',
   categoryId: null as number | null,
+  status: null as number | null,
 })
+
+// 状态下拉选项
+const statusOptions: SelectOption[] = [
+  { label: '已发布', value: 1 },
+  { label: '草稿', value: 0 },
+]
 
 // 分页状态 (网格排版适合 9 篇/页，即 3x3 矩阵)
 const pagination = reactive({
@@ -84,11 +91,12 @@ async function loadCategories() {
 async function loadArticles() {
   loading.value = true
   try {
-    const res = await pageQueryArticles({
+    const res = await adminPageQueryArticles({
       pageNum: pagination.page,
       pageSize: pagination.pageSize,
       keyword: filterForm.keyword.trim() || undefined,
       categoryId: filterForm.categoryId ?? undefined,
+      status: filterForm.status ?? undefined,
     })
     articleList.value = res.records
     pagination.itemCount = res.total
@@ -107,6 +115,7 @@ function handleSearch() {
 function handleReset() {
   filterForm.keyword = ''
   filterForm.categoryId = null
+  filterForm.status = null
   pagination.page = 1
   loadArticles()
 }
@@ -189,6 +198,17 @@ onMounted(async () => {
           />
         </div>
 
+        <!-- 状态选择下拉 -->
+        <div class="w-36">
+          <NSelect
+            v-model:value="filterForm.status"
+            :options="statusOptions"
+            placeholder="全部状态"
+            clearable
+            @update:value="handleSearch"
+          />
+        </div>
+
         <NButton secondary @click="handleSearch">
           查询
         </NButton>
@@ -221,9 +241,19 @@ onMounted(async () => {
                 <NTag size="small" :bordered="false" type="info">
                   🏷️ {{ getCategoryName(article.categoryId) }}
                 </NTag>
-                <span class="inline-flex items-center gap-1 text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
+                <span
+                  v-if="article.status === 1"
+                  class="inline-flex items-center gap-1 text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium"
+                >
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
                   已发布
+                </span>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1 text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full font-medium"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>
+                  草稿
                 </span>
                 <span class="font-mono text-xs text-stone-400 ml-auto">
                   {{ formatDateTime(article.createdAt) }}
@@ -265,8 +295,17 @@ onMounted(async () => {
                 <NTag size="small" :bordered="false" type="info">
                   🏷️ {{ getCategoryName(article.categoryId) }}
                 </NTag>
-                <span class="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
+                <span
+                  v-if="article.status === 1"
+                  class="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium"
+                >
                   已发布
+                </span>
+                <span
+                  v-else
+                  class="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full font-medium"
+                >
+                  草稿
                 </span>
               </div>
 
@@ -324,7 +363,7 @@ onMounted(async () => {
       class="glass-panel rounded-2xl px-6 py-4 flex items-center justify-between border border-white/70 shadow-xs"
     >
       <div class="text-xs text-stone-500 font-sans">
-        共 <strong class="text-stone-800">{{ pagination.itemCount }}</strong> 篇已发布文章
+        共 <strong class="text-stone-800">{{ pagination.itemCount }}</strong> 篇文章
       </div>
 
       <NPagination
