@@ -24,6 +24,7 @@
         <module>nexus-category</module>
         <module>nexus-article</module>
         <module>nexus-user</module>
+        <module>nexus-auth</module>
         <module>nexus-app</module>
     </modules>
 
@@ -32,6 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mybatis-plus.version>3.5.17</mybatis-plus.version>
         <nexus.version>0.0.1-SNAPSHOT</nexus.version>
+        <jjwt.version>0.12.6</jjwt.version>
     </properties>
 
     <!-- 2. 版本统一收口菜单 (子模块按需引用，无需手写版本号) -->
@@ -57,6 +59,28 @@
                 <groupId>com.nep</groupId>
                 <artifactId>nexus-user</artifactId>
                 <version>${nexus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nep</groupId>
+                <artifactId>nexus-auth</artifactId>
+                <version>${nexus.version}</version>
+            </dependency>
+
+            <!-- JJWT 组件版本锁定 -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
             </dependency>
 
             <!-- MyBatis-Plus 相关组件版本锁定 -->

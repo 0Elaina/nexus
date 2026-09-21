@@ -8,8 +8,8 @@ import org.springframework.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nep.article.constant.ArticleApiCode;
-import com.nep.article.dto.ArticleCreateDTO;
 import com.nep.article.dto.ArticlePageQuery;
+import com.nep.article.dto.ArticleSaveDTO;
 import com.nep.article.entity.Article;
 import com.nep.article.mapper.ArticleMapper;
 import com.nep.article.service.ArticleService;
@@ -84,11 +84,11 @@ public class ArticleServiceImpl implements ArticleService {
     /**
      * 创建文章
      * 
-     * @param dto 文章创建DTO
+     * @param dto 文章保存DTO
      * @return 创建的文章ID
      */
     @Override
-    public Long createArticle(ArticleCreateDTO dto) {
+    public Long createArticle(ArticleSaveDTO dto) {
         // 校验分类是否存在
         categoryService.getCategoryById(dto.getCategoryId());
         String summary = StringUtils.hasText(dto.getSummary())
@@ -110,7 +110,7 @@ public class ArticleServiceImpl implements ArticleService {
      * 
      * @param articleId 文章ID
      * @return 文章详情VO
-     * @throws IllegalArgumentException 如果文章不存在
+     * @throws BusinessException 如果文章不存在
      */
     @Override
     public ArticleDetailVO getArticleDetail(Long id) {
@@ -152,4 +152,45 @@ public class ArticleServiceImpl implements ArticleService {
         return plainText.length() > 150 ? plainText.substring(0, 150) + "..." : plainText;
     }
 
+    /**
+     * 修改文章
+     *
+     * @param id  文章主键 ID
+     * @param dto 文章保存DTO
+     */
+    @Override
+    public void updateArticle(Long id, ArticleSaveDTO dto) {
+        Article article = articleMapper.selectById(id);
+        if (article == null) {
+            throw new BusinessException(ArticleApiCode.ARTICLE_NOT_FOUND);
+        }
+        // 校验目标分类是否存在
+        categoryService.getCategoryById(dto.getCategoryId());
+
+        String summary = StringUtils.hasText(dto.getSummary())
+                ? dto.getSummary()
+                : extractSummary(dto.getContent());
+
+        article.setTitle(dto.getTitle());
+        article.setContent(dto.getContent());
+        article.setSummary(summary);
+        article.setCategoryId(dto.getCategoryId());
+        article.setStatus(dto.getStatus());
+
+        articleMapper.updateById(article);
+    }
+
+    /**
+     * 删除文章
+     *
+     * @param id 文章主键 ID
+     */
+    @Override
+    public void deleteArticle(Long id) {
+        Article article = articleMapper.selectById(id);
+        if (article == null) {
+            throw new BusinessException(ArticleApiCode.ARTICLE_NOT_FOUND);
+        }
+        articleMapper.deleteById(id);
+    }
 }

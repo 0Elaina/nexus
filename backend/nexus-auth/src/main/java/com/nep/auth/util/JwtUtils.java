@@ -1,4 +1,4 @@
-package com.nep.user.util;
+package com.nep.auth.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -27,7 +27,7 @@ public class JwtUtils {
      * @param userId   用户 ID
      * @param username 用户名
      * @param role     角色
-     * @return JWT 令牌
+     * @return JWT 令牌字符串
      */
     public String generateToken(Long userId, String username, String role) {
         Date now = new Date();
@@ -46,7 +46,7 @@ public class JwtUtils {
      * 解析 JWT 令牌
      * 
      * @param token JWT 令牌
-     * @return 解析后的 JWT 令牌
+     * @return 解析后的 Claims 载荷，若非法或过期返回 null
      */
     public Claims parseToken(String token) {
         try {
@@ -64,7 +64,7 @@ public class JwtUtils {
      * 获取 JWT 令牌剩余的 TTL 秒数
      * 
      * @param token JWT 令牌
-     * @return 剩余的 TTL 秒数
+     * @return 剩余有效秒数
      */
     public long getRemainingTtlSeconds(String token) {
         Claims claims = parseToken(token);
@@ -88,10 +88,7 @@ public class JwtUtils {
     }
 
     /**
-     * 将 application.yml 中的长字符串转成 UTF-8 字节数组
-     * 再转成 HMAC-SHA 安全密钥对象
-     * 
-     * @return HMAC-SHA 安全密钥对象
+     * 提取密钥
      */
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));

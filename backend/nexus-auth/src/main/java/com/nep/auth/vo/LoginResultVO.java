@@ -1,4 +1,4 @@
-package com.nep.user.vo;
+package com.nep.auth.vo;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginResultVO implements Serializable {
     @Serial
-    private final static long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     private String token;
     private String id;

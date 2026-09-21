@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nep.category.entity.Category;
 import com.nep.category.service.CategoryService;
+import com.nep.common.annotation.RequireRole;
 import com.nep.common.api.Result;
+import com.nep.common.constant.RoleConstants;
 import com.nep.common.page.PageQuery;
 import com.nep.common.page.PageResult;
 
@@ -45,6 +47,7 @@ public class CategoryController {
      * 
      * @param name 分类名称
      */
+    @RequireRole(RoleConstants.ROLE_ADMIN)
     @PostMapping
     public Result<Void> createCategory(
             @RequestParam @NotBlank(message = "分类名称不能为空") @Size(max = 50, message = "分类名称最多50个字符") String name) {
@@ -58,6 +61,7 @@ public class CategoryController {
      * @param id   分类ID
      * @param name 分类名称
      */
+    @RequireRole(RoleConstants.ROLE_ADMIN)
     @PutMapping("/{id}")
     public Result<Void> updateCategory(
             @PathVariable Long id,
@@ -71,6 +75,7 @@ public class CategoryController {
      * 
      * @param id 分类ID
      */
+    @RequireRole(RoleConstants.ROLE_ADMIN)
     @DeleteMapping("/{id}")
     public Result<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
@@ -83,6 +88,7 @@ public class CategoryController {
      * @param query 分页查询参数
      * @return 分页查询结果
      */
+    @RequireRole(RoleConstants.ROLE_ADMIN)
     @GetMapping("/page")
     public Result<PageResult<Category>> pageQueryCategories(@Valid PageQuery query) {
         return Result.success(categoryService.pageQueryCategories(query));

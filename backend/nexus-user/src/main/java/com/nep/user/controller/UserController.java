@@ -7,21 +7,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nep.common.annotation.RequireRole;
 import com.nep.common.api.Result;
-import com.nep.user.dto.UserLoginDTO;
 import com.nep.user.dto.UserRegisterDTO;
 import com.nep.user.service.UserService;
-import com.nep.user.vo.LoginResultVO;
 import com.nep.user.vo.UserVO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 用户领域控制器 (注册与个人资料管理)
+ */
 @Validated
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     /**
@@ -36,35 +39,13 @@ public class UserController {
     }
 
     /**
-     * 用户登录
-     * 
-     * @param dto 登录参数
-     * @return 登录结果VO
-     */
-    @PostMapping("/login")
-    public Result<LoginResultVO> login(@Valid @RequestBody UserLoginDTO dto) {
-        return Result.success(userService.login(dto));
-    }
-
-    /**
-     * 用户注销
-     * 
-     * @return 空结果
-     */
-    @PostMapping("/logout")
-    public Result<Void> logout() {
-        userService.logout();
-        return Result.success();
-    }
-
-    /**
-     * 获取当前用户信息
+     * 获取当前登录用户信息
      * 
      * @return 用户VO
      */
+    @RequireRole
     @GetMapping("/me")
     public Result<UserVO> getCurrentUser() {
         return Result.success(userService.getCurrentUserInfo());
     }
-
 }

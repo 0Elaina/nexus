@@ -19,5 +19,7 @@ public class ApiCode {
     public static final ApiCode SUCCESS = new ApiCode(HttpStatus.OK, "SUCCESS", "成功");
     public static final ApiCode BAD_REQUEST = new ApiCode(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "请求参数校验失败");
     public static final ApiCode TOO_MANY_REQUESTS = new ApiCode(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", "请求过去频繁, 请稍后重试");
+    public static final ApiCode UNAUTHORIZED = new ApiCode(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "登录已过期或未登录");
+    public static final ApiCode ACCESS_DENIED = new ApiCode(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "无权限访问");
     public static final ApiCode INTERNAL_SERVER_ERROR = new ApiCode(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "服务器内部错误");
 }

@@ -1,4 +1,4 @@
-package com.nep.user.dto;
+package com.nep.auth.dto;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,7 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserLoginDTO implements Serializable {
     @Serial
-    private final static long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     @NotBlank(message = "用户名不能为空")
     @Size(min = 3, max = 30, message = "用户名长度为 3-30 个字符")

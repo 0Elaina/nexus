@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.nep</groupId>
+        <artifactId>nexus-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>nexus-auth</artifactId>
+    <name>nexus-auth</name>
+
+    <dependencies>
+        <!-- 引入公共基础设施 -->
+        <dependency>
+            <groupId>com.nep</groupId>
+            <artifactId>nexus-common</artifactId>
+        </dependency>
+
+        <!-- 依赖用户域模块 (查询用户账号、密码及基础角色信息) -->
+        <dependency>
+            <groupId>com.nep</groupId>
+            <artifactId>nexus-user</artifactId>
+        </dependency>
+
+        <!-- Spring Boot 4 AspectJ 切面组件 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
+        </dependency>
+
+        <!-- BCrypt 强哈希密码加解密器 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
+        <!-- JJWT 核心 API 与实现 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
