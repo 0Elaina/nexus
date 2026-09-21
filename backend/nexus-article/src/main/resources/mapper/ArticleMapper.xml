@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nep.article.mapper.ArticleMapper">
+    <update id="batchUpdateViewCount">
+        UPDATE article 
+        SET view_count = CASE id
+        <foreach collection="articles" item="article">
+            WHEN #{article.id} THEN #{article.viewCount}
+        </foreach>
+        END
+        WHERE id IN
+        <foreach collection="articles" item="article" open="(" separator="," close=")">
+            #{article.id}
+        </foreach>
+    </update>
+</mapper>

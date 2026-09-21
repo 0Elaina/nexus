@@ -2,6 +2,7 @@ package com.nep.article.service.impl;
 
 import java.util.List;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -19,6 +20,12 @@ import com.nep.category.entity.Category;
 import com.nep.category.service.CategoryService;
 import com.nep.common.exception.BusinessException;
 import com.nep.common.page.PageResult;
+import com.nep.common.util.IpUtils;
+
+import static com.nep.article.constant.ArticleRedisConstants.KEY_ARTICLE_VIEW_COUNT;
+import static com.nep.article.constant.ArticleRedisConstants.KEY_ARTICLE_VIEW_DIRTY;
+import static com.nep.article.constant.ArticleRedisConstants.KEY_PREFIX_UV;
+import static com.nep.article.constant.ArticleRedisConstants.UV_COOLDOWN;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class ArticleServiceImpl implements ArticleService {
     private final ArticleMapper articleMapper;
     private final CategoryService categoryService;
+    private final StringRedisTemplate stringRedisTemplate;
 
     private static final String VIEW_COUNT = "viewCount";
     private static final String UPDATED_AT = "updatedAt";
@@ -73,6 +81,9 @@ public class ArticleServiceImpl implements ArticleService {
         List<ArticleListItemVO> voList = page.getRecords().stream()
                 .map(ArticleListItemVO::from)
                 .toList();
+        // 批量取回所有文章的最新浏览量
+        fillRealtimeViewCounts(voList);
+
         return PageResult.<ArticleListItemVO>builder()
                 .records(voList)
                 .total(page.getTotal())
@@ -102,6 +113,8 @@ public class ArticleServiceImpl implements ArticleService {
         article.setStatus(dto.getStatus());
         article.setViewCount(0L);
         articleMapper.insert(article);
+        // 确保新文章一经发布，在 Redis 中就已有合法初值，后续详情读取与列表批量读取立即可见
+        stringRedisTemplate.opsForHash().put(KEY_ARTICLE_VIEW_COUNT, article.getId().toString(), "0");
         return article.getId();
     }
 
@@ -118,8 +131,37 @@ public class ArticleServiceImpl implements ArticleService {
         if (article == null) {
             throw new BusinessException(ArticleApiCode.ARTICLE_NOT_FOUND);
         }
+
+        // 在 Redis 中记录并获取最新访问量
+        Long latestViewCount = recordAndGetViewCount(id, article.getViewCount());
+        article.setViewCount(latestViewCount);
+
         Category category = categoryService.getCategoryById(article.getCategoryId());
         return ArticleDetailVO.from(article, category.getName());
+    }
+
+    /**
+     * 批量从 Redis 中获取最新浏览量并覆盖到列表 VO 中
+     *
+     * @param voList 分页文章 VO 列表
+     */
+    private void fillRealtimeViewCounts(List<ArticleListItemVO> voList) {
+        if (voList == null || voList.isEmpty()) {
+            return;
+        }
+        List<Object> articleIds = voList.stream()
+                .map(a -> (Object) a.getId())
+                .toList();
+
+        // 批量取回所有文章的最新浏览量
+        List<Object> redisViewCounts = stringRedisTemplate.opsForHash().multiGet(KEY_ARTICLE_VIEW_COUNT, articleIds);
+        // 按下标一一对应覆盖
+        for (int i = 0; i < voList.size(); i++) {
+            Object countObj = redisViewCounts.get(i);
+            if (countObj != null) {
+                voList.get(i).setViewCount(Long.parseLong(countObj.toString()));
+            }
+        }
     }
 
     /**
@@ -192,5 +234,38 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ArticleApiCode.ARTICLE_NOT_FOUND);
         }
         articleMapper.deleteById(id);
+        // 删除 Redis 中的访问量记录
+        stringRedisTemplate.opsForHash().delete(KEY_ARTICLE_VIEW_COUNT, id.toString());
+        // 删除脏数据
+        stringRedisTemplate.opsForSet().remove(KEY_ARTICLE_VIEW_DIRTY, id.toString());
     }
+
+    /**
+     * 记录并获取文章访问量
+     * 
+     * @param articleId   文章ID
+     * @param dbViewCount 数据库中当前访问量
+     * @return 更新后的访问量
+     */
+    private Long recordAndGetViewCount(Long articleId, Long dbViewCount) {
+        long baseCount = dbViewCount == null ? 0L : dbViewCount;
+        String idStr = articleId.toString();
+        String clientIp = IpUtils.getClientIp();
+        // 生成 UV 键
+        String uvKey = KEY_PREFIX_UV + idStr + ":" + clientIp;
+
+        Boolean setSuccess = stringRedisTemplate.opsForValue().setIfAbsent(uvKey, "1", UV_COOLDOWN);
+        // 首次访问，记录 UV 并增加访问量
+        if (Boolean.TRUE.equals(setSuccess)) {
+            stringRedisTemplate.opsForHash().putIfAbsent(KEY_ARTICLE_VIEW_COUNT, idStr, String.valueOf(baseCount));
+            long newCount = stringRedisTemplate.opsForHash().increment(KEY_ARTICLE_VIEW_COUNT, idStr, 1L);
+            stringRedisTemplate.opsForSet().add(KEY_ARTICLE_VIEW_DIRTY, idStr);
+            return newCount;
+        } else {
+            // 冷却期内重复访问
+            Object value = stringRedisTemplate.opsForHash().get(KEY_ARTICLE_VIEW_COUNT, idStr);
+            return value == null ? baseCount : Long.parseLong(value.toString());
+        }
+    }
+
 }
