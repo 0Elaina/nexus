@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+
+/**
+ * Nexus Anime-UI-Craft & Design Tokens System
+ * 第一层：Tailwind CSS v4 @theme 核心设计令牌 (Single Source of Truth)
+ */
+@theme {
+  /* 布局标尺尺寸系统 */
+  --spacing-nav-height: 56px;
+  --spacing-stage-max: 1120px;
+  --spacing-toy-dock: 44px;
+
+  /* 东方温润白茶和纸底色与石墨墨阶 */
+  --color-atelier: #FAFAF9;
+  --color-canvas: #FFFFFF;
+  --color-ink-primary: #18181B;
+  --color-ink-secondary: #52525B;
+  --color-ink-tertiary: #71717A;
+  --color-ink-muted: #A1A1AA;
+
+  /* 和纸印章与物语点缀色彩 */
+  --color-accent-indigo: #2563EB;
+  --color-accent-indigo-soft: #EFF6FF;
+  --color-accent-amber: #D97706;
+  --color-accent-amber-soft: #FFFBEB;
+  --color-accent-sakura: #F43F5E;
+  --color-accent-sakura-soft: #FFF1F2;
+  --color-accent-emerald: #059669;
+  --color-accent-emerald-soft: #ECFDF5;
+  --color-accent-sky: #0284C7;
+  --color-accent-sky-soft: #F0F9FF;
+
+  /* 超椭圆同心嵌套圆角阶梯 */
+  --radius-pill: 9999px;     /* 跑道型悬浮胶囊 */
+  --radius-stage: 1.5rem;    /* 24px 主展台大容器 */
+  --radius-card: 1rem;       /* 16px 面板与画框 */
+  --radius-control: 0.75rem; /* 12px 按钮与输入框 */
+  --radius-seal: 0.5rem;     /* 8px 和纸标签印章 */
+
+  /* 字体族定义 */
+  --font-zen: 'Zen Maru Gothic', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono-code: 'JetBrains Mono', monospace;
+}
+
+/**
+ * 运行时 CSS 变量 (供微拟物柔和毛玻璃与双向漫反射落阴使用)
+ */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-highlight: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+
+  --shadow-diffuse-sm: 0 2px 8px rgba(28, 25, 23, 0.03), 0 1px 2px rgba(28, 25, 23, 0.02);
+  --shadow-diffuse-md: 0 10px 30px -4px rgba(28, 25, 23, 0.05), 0 2px 8px -2px rgba(28, 25, 23, 0.02);
+  --shadow-diffuse-lg: 0 20px 48px -8px rgba(28, 25, 23, 0.07), 0 4px 12px rgba(28, 25, 23, 0.03);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-atelier);
+  color: var(--color-ink-primary);
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  /* 晨曦双色天光漫射空气场 (新海诚天空漫射透视) */
+  background-image: 
+    radial-gradient(ellipse 70% 60% at 15% 0%, rgba(224, 242, 254, 0.65) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 0%, rgba(254, 243, 199, 0.5) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(255, 228, 230, 0.35) 0%, transparent 50%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 微拟物柔和毛玻璃 (Soft Neumorphism Glass) */
+.soft-glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-highlight), var(--shadow-diffuse-md);
+}
+
+.soft-glass-card {
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: var(--glass-highlight), var(--shadow-diffuse-sm);
+}
+
+.soft-concave-card {
+  background: rgba(248, 248, 246, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02), 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+}
+
+/* 文字与排版艺术微距工具 */
+.font-zen {
+  font-family: var(--font-zen);
+}
+
+.tracking-cold {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.text-glow-soft {
+  text-shadow: 0 1px 12px rgba(255, 255, 255, 0.85);
+}
+
+/* 日系和纸印章 Tag (Washi Seal) */
+.washi-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-seal);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  color: var(--color-ink-secondary);
+}
+
+.washi-seal-indigo {
+  background: var(--color-accent-indigo-soft);
+  border-color: rgba(37, 99, 235, 0.18);
+  color: var(--color-accent-indigo);
+}
+
+.washi-seal-amber {
+  background: var(--color-accent-amber-soft);
+  border-color: rgba(217, 119, 6, 0.22);
+  color: var(--color-accent-amber);
+}
+
+.washi-seal-emerald {
+  background: var(--color-accent-emerald-soft);
+  border-color: rgba(5, 150, 105, 0.18);
+  color: var(--color-accent-emerald);
+}
+
+.washi-seal-sakura {
+  background: var(--color-accent-sakura-soft);
+  border-color: rgba(244, 63, 94, 0.2);
+  color: var(--color-accent-sakura);
+}
