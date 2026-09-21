@@ -1,4 +1,4 @@
-package com.nep.category;
+package com.nep.category.constant;
 
 import org.springframework.http.HttpStatus;
 

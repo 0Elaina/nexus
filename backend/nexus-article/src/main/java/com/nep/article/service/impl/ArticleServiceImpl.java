@@ -7,7 +7,7 @@ import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nep.article.ArticleApiCode;
+import com.nep.article.constant.ArticleApiCode;
 import com.nep.article.dto.ArticleCreateDTO;
 import com.nep.article.dto.ArticlePageQuery;
 import com.nep.article.entity.Article;
@@ -71,7 +71,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         // 转换为VO列表
         List<ArticleListItemVO> voList = page.getRecords().stream()
-                .map(ArticleListItemVO::fromArticle)
+                .map(ArticleListItemVO::from)
                 .toList();
         return PageResult.<ArticleListItemVO>builder()
                 .records(voList)
@@ -119,7 +119,7 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ArticleApiCode.ARTICLE_NOT_FOUND);
         }
         Category category = categoryService.getCategoryById(article.getCategoryId());
-        return ArticleDetailVO.fromArticle(article, category.getName());
+        return ArticleDetailVO.from(article, category.getName());
     }
 
     /**

@@ -28,7 +28,7 @@ public class ArticleListItemVO implements Serializable {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static ArticleListItemVO fromArticle(Article article) {
+    public static ArticleListItemVO from(Article article) {
         return ArticleListItemVO.builder()
                 .id(article.getId().toString())
                 .title(article.getTitle())

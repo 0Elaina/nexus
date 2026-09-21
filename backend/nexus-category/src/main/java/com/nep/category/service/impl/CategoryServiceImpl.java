@@ -10,7 +10,7 @@ import org.springframework.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.nep.category.CategoryApiCode;
+import com.nep.category.constant.CategoryApiCode;
 import com.nep.category.entity.Category;
 import com.nep.category.mapper.CategoryMapper;
 import com.nep.category.service.CategoryService;

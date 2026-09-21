@@ -36,7 +36,7 @@ public class ArticleDetailVO implements Serializable {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static ArticleDetailVO fromArticle(Article article, String categoryName) {
+    public static ArticleDetailVO from(Article article, String categoryName) {
         return ArticleDetailVO.builder()
                 .id(article.getId().toString())
                 .title(article.getTitle())

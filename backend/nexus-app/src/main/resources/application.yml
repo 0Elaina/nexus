@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: nexus
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
   datasource:
     driver-class-name: org.h2.Driver
@@ -14,9 +16,9 @@ spring:
   # Redis 连接池配置
   data:
     redis:
-      host: localhost
-      port: 6380
-      password: 123456
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+      password: ${REDIS_PASSWORD:}
       database: 0
       timeout: 3000ms
       lettuce:
@@ -57,3 +59,9 @@ logging:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
+
+nexus:
+  jwt:
+    # 优先从环境变量或 -local.yml 获取，兜底为空
+    secret: ${NEXUS_JWT_SECRET:}
+    expire-ms: ${NEXUS_JWT_EXPIRE_MS:604800000}

@@ -1,4 +1,4 @@
-package com.nep.article;
+package com.nep.article.constant;
 
 import org.springframework.http.HttpStatus;
 

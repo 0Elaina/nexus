@@ -51,3 +51,75 @@ VALUES (
         1,
         0
     );
+
+-- =========================================================================
+-- 创建用户表 (sys_user)
+-- 权限体系架构说明 (RBAC0 极简三级)：
+-- 1. 游客 (Guest)      : 无需账号，无数据库记录，无 Token 纯匿名只读公开接口
+-- 2. 普通用户 (User)   : 注册入库，角色为 ROLE_USER，拥有前台互动与个人资料权限
+-- 3. 博主管理员 (Admin) : 系统初始账号，角色为 ROLE_ADMIN，拥有全站与后台管理权限
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS sys_user (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '用户主键ID',
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '登录用户名（唯一）',
+    password VARCHAR(100) NOT NULL COMMENT 'BCrypt 加密密码',
+    nickname VARCHAR(50) NOT NULL DEFAULT '' COMMENT '用户昵称',
+    avatar VARCHAR(255) NOT NULL DEFAULT '' COMMENT '头像 URL 地址',
+    email VARCHAR(100) NOT NULL DEFAULT '' COMMENT '用户邮箱',
+    role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER' COMMENT '角色: ROLE_ADMIN-博主管理员, ROLE_USER-普通用户',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '账号状态: 0-禁用, 1-正常',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+
+-- 索引设计说明：
+INDEX idx_username (username), -- 加速用户名登录检索
+    INDEX idx_role (role)          -- 加速角色过滤
+);
+
+-- 插入默认初始博主管理员账号 (用户名: admin, 初始密码: admin123)
+-- BCrypt 密文对应明文 'admin123'
+INSERT IGNORE INTO
+    sys_user (
+        id,
+        username,
+        password,
+        nickname,
+        avatar,
+        email,
+        role,
+        status
+    )
+VALUES (
+        1,
+        'admin',
+        '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2',
+        '博主管理员',
+        'https://api.dicebear.com/7.x/bottts/svg?seed=nexus-admin',
+        'admin@nexus.blog',
+        'ROLE_ADMIN',
+        1
+    );
+
+-- 插入默认普通用户测试账号 (用户名: testuser, 初始密码: admin123)
+-- 用于开发阶段直接验证前台普通用户登录、权限隔离与防越权
+INSERT IGNORE INTO
+    sys_user (
+        id,
+        username,
+        password,
+        nickname,
+        avatar,
+        email,
+        role,
+        status
+    )
+VALUES (
+        2,
+        'testuser',
+        '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2',
+        '普通测试用户',
+        'https://api.dicebear.com/7.x/bottts/svg?seed=nexus-user',
+        'user@nexus.blog',
+        'ROLE_USER',
+        1
+    );

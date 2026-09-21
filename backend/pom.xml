@@ -23,6 +23,7 @@
         <module>nexus-common</module>
         <module>nexus-category</module>
         <module>nexus-article</module>
+        <module>nexus-user</module>
         <module>nexus-app</module>
     </modules>
 
@@ -50,6 +51,11 @@
             <dependency>
                 <groupId>com.nep</groupId>
                 <artifactId>nexus-article</artifactId>
+                <version>${nexus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nep</groupId>
+                <artifactId>nexus-user</artifactId>
                 <version>${nexus.version}</version>
             </dependency>
 
