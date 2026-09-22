@@ -1,9 +1,13 @@
 package com.nep.article.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -12,7 +16,9 @@ import com.nep.article.constant.ArticleApiCode;
 import com.nep.article.dto.ArticlePageQuery;
 import com.nep.article.dto.ArticleSaveDTO;
 import com.nep.article.entity.Article;
+import com.nep.article.entity.ArticleTag;
 import com.nep.article.mapper.ArticleMapper;
+import com.nep.article.mapper.ArticleTagMapper;
 import com.nep.article.service.ArticleService;
 import com.nep.article.vo.ArticleDetailVO;
 import com.nep.article.vo.ArticleListItemVO;
@@ -21,6 +27,9 @@ import com.nep.category.service.CategoryService;
 import com.nep.common.exception.BusinessException;
 import com.nep.common.page.PageResult;
 import com.nep.common.util.IpUtils;
+import com.nep.tag.constant.TagApiCode;
+import com.nep.tag.entity.Tag;
+import com.nep.tag.service.TagService;
 
 import static com.nep.article.constant.ArticleRedisConstants.KEY_ARTICLE_VIEW_COUNT;
 import static com.nep.article.constant.ArticleRedisConstants.KEY_ARTICLE_VIEW_DIRTY;
@@ -34,6 +43,8 @@ import lombok.RequiredArgsConstructor;
 public class ArticleServiceImpl implements ArticleService {
     private final ArticleMapper articleMapper;
     private final CategoryService categoryService;
+    private final TagService tagService;
+    private final ArticleTagMapper articleTagMapper;
     private final StringRedisTemplate stringRedisTemplate;
 
     private static final String VIEW_COUNT = "viewCount";
@@ -99,12 +110,17 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 创建的文章ID
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createArticle(ArticleSaveDTO dto) {
         // 校验分类是否存在
         categoryService.getCategoryById(dto.getCategoryId());
+
+        // 生成摘要
         String summary = StringUtils.hasText(dto.getSummary())
                 ? dto.getSummary()
                 : extractSummary(dto.getContent());
+
+        // 创建文章实体
         Article article = new Article();
         article.setTitle(dto.getTitle());
         article.setSummary(summary);
@@ -112,7 +128,12 @@ public class ArticleServiceImpl implements ArticleService {
         article.setCategoryId(dto.getCategoryId());
         article.setStatus(dto.getStatus());
         article.setViewCount(0L);
+
+        // 执行插入操作
         articleMapper.insert(article);
+        // 绑定标签
+        bindArticleTags(article.getId(), dto.getTagIds());
+
         // 确保新文章一经发布，在 Redis 中就已有合法初值，后续详情读取与列表批量读取立即可见
         stringRedisTemplate.opsForHash().put(KEY_ARTICLE_VIEW_COUNT, article.getId().toString(), "0");
         return article.getId();
@@ -201,6 +222,7 @@ public class ArticleServiceImpl implements ArticleService {
      * @param dto 文章保存DTO
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateArticle(Long id, ArticleSaveDTO dto) {
         Article article = articleMapper.selectById(id);
         if (article == null) {
@@ -220,6 +242,12 @@ public class ArticleServiceImpl implements ArticleService {
         article.setStatus(dto.getStatus());
 
         articleMapper.updateById(article);
+
+        // 清理旧标签关联
+        articleTagMapper.delete(new LambdaQueryWrapper<ArticleTag>()
+                .eq(ArticleTag::getArticleId, id));
+        // 绑定新标签
+        bindArticleTags(id, dto.getTagIds());
     }
 
     /**
@@ -228,16 +256,53 @@ public class ArticleServiceImpl implements ArticleService {
      * @param id 文章主键 ID
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteArticle(Long id) {
         Article article = articleMapper.selectById(id);
         if (article == null) {
             throw new BusinessException(ArticleApiCode.ARTICLE_NOT_FOUND);
         }
         articleMapper.deleteById(id);
+        // 清理文章标签关联记录
+        articleTagMapper.delete(new LambdaQueryWrapper<ArticleTag>()
+                .eq(ArticleTag::getArticleId, id));
+
         // 删除 Redis 中的访问量记录
         stringRedisTemplate.opsForHash().delete(KEY_ARTICLE_VIEW_COUNT, id.toString());
         // 删除脏数据
         stringRedisTemplate.opsForSet().remove(KEY_ARTICLE_VIEW_DIRTY, id.toString());
+    }
+
+    /**
+     * 绑定文章标签
+     * 
+     * @param articleId 文章ID
+     * @param tagIds    标签ID列表
+     */
+    private void bindArticleTags(Long articleId, List<Long> tagIds) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            return;
+        }
+        if (articleId == null) {
+            throw new BusinessException(ArticleApiCode.ARTICLE_ID_EMPTY);
+        }
+
+        // 校验是否存在不存在的标签ID
+        Set<Long> uniqueTagIds = new HashSet<>(tagIds);
+        List<Tag> existTagIds = tagService.getTagsByIds(uniqueTagIds);
+        if (uniqueTagIds.size() != existTagIds.size()) {
+            throw new BusinessException(TagApiCode.TAG_NOT_FOUND);
+        }
+
+        // 构建文章标签列表
+        List<ArticleTag> articleTags = new ArrayList<>();
+        for (Long tagId : uniqueTagIds) {
+            ArticleTag articleTag = new ArticleTag();
+            articleTag.setArticleId(articleId);
+            articleTag.setTagId(tagId);
+            articleTags.add(articleTag);
+        }
+        articleTagMapper.insert(articleTags);
     }
 
     /**

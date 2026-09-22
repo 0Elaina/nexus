@@ -21,6 +21,10 @@
             <groupId>com.nep</groupId>
             <artifactId>nexus-category</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.nep</groupId>
+            <artifactId>nexus-tag</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

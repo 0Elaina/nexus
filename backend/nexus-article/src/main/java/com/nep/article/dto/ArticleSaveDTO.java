@@ -2,6 +2,7 @@ package com.nep.article.dto;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -43,4 +44,7 @@ public class ArticleSaveDTO implements Serializable {
     @Min(value = 0, message = "文章状态必须为0或1")
     @Max(value = 1, message = "文章状态必须为0或1")
     private Integer status;
+
+    @Size(max = 10, message = "文章最多关联 10 个标签")
+    private List<@NotNull(message = "标签ID不能为 null") @Positive(message = "标签ID必须为正整数") Long> tagIds;
 }

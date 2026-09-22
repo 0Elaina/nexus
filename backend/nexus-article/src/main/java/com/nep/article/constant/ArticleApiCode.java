@@ -12,4 +12,8 @@ public final class ArticleApiCode {
             HttpStatus.NOT_FOUND,
             "ARTICLE_NOT_FOUND",
             "文章不存在");
+    public static final ApiCode ARTICLE_ID_EMPTY = new ApiCode(
+            HttpStatus.BAD_REQUEST,
+            "ARTICLE_ID_EMPTY",
+            "文章 ID不能为空");
 }
