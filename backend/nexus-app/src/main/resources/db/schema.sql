@@ -123,3 +123,37 @@ VALUES (
         'ROLE_USER',
         1
     );
+
+-- 创建标签表 (tag)
+CREATE TABLE IF NOT EXISTS tag (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '标签主键ID',
+    name VARCHAR(50) NOT NULL UNIQUE COMMENT '标签名称（唯一）',
+    created_at DATETIME NOT NULL COMMENT '创建时间',
+    updated_at DATETIME NOT NULL COMMENT '修改时间'
+);
+
+-- 插入默认初始标签（使用 INSERT IGNORE 保证重启幂等，指定时间初始值）
+INSERT IGNORE INTO
+    tag (id, name, created_at, updated_at)
+VALUES (1, 'Java', NOW(), NOW()),
+    (2, 'Spring Boot', NOW(), NOW()),
+    (3, 'Redis', NOW(), NOW()),
+    (4, 'React', NOW(), NOW());
+
+-- 创建文章与标签多对多关联中间表 (article_tag)
+CREATE TABLE IF NOT EXISTS article_tag (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '关联主键ID',
+    article_id BIGINT NOT NULL COMMENT '关联文章ID',
+    tag_id BIGINT NOT NULL COMMENT '关联标签ID',
+
+    -- 复合唯一索引：防止重复绑定，且天然加速以 article_id 为条件的查询
+    UNIQUE KEY uk_article_tag (article_id, tag_id),
+    -- 单列索引：加速根据 tag_id 反查关联文章
+    INDEX idx_tag_id (tag_id)
+);
+
+-- 为初始的测试文章 1（欢迎使用 Nexus 博客系统）预挂载两个标签（1: Java, 2: Spring Boot）
+INSERT IGNORE INTO
+    article_tag (id, article_id, tag_id)
+VALUES (1, 1, 1),
+    (2, 1, 2);

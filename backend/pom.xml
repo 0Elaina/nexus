@@ -25,6 +25,7 @@
         <module>nexus-article</module>
         <module>nexus-user</module>
         <module>nexus-auth</module>
+        <module>nexus-tag</module>
         <module>nexus-app</module>
     </modules>
 
@@ -63,6 +64,11 @@
             <dependency>
                 <groupId>com.nep</groupId>
                 <artifactId>nexus-auth</artifactId>
+                <version>${nexus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nep</groupId>
+                <artifactId>nexus-tag</artifactId>
                 <version>${nexus.version}</version>
             </dependency>
 

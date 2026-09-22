@@ -32,6 +32,10 @@
             <groupId>com.nep</groupId>
             <artifactId>nexus-auth</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.nep</groupId>
+            <artifactId>nexus-tag</artifactId>
+        </dependency>
 
         <!-- H2 运行时驱动与 Console 调试支持 -->
         <dependency>
