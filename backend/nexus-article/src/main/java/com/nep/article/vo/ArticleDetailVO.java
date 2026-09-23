@@ -3,8 +3,10 @@ package com.nep.article.vo;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.nep.article.entity.Article;
+import com.nep.tag.entity.Tag;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,11 +34,13 @@ public class ArticleDetailVO implements Serializable {
     private String categoryName;
     private Integer status;
     private Long viewCount;
+    @Builder.Default
+    private List<Tag> tags = List.of();
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static ArticleDetailVO from(Article article, String categoryName) {
+    public static ArticleDetailVO from(Article article, String categoryName, List<Tag> tags) {
         return ArticleDetailVO.builder()
                 .id(article.getId().toString())
                 .title(article.getTitle())
@@ -46,6 +50,7 @@ public class ArticleDetailVO implements Serializable {
                 .categoryName(categoryName)
                 .status(article.getStatus())
                 .viewCount(article.getViewCount())
+                .tags(tags)
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())
                 .build();

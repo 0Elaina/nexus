@@ -3,7 +3,10 @@ package com.nep.article.service.impl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -64,8 +67,33 @@ public class ArticleServiceImpl implements ArticleService {
         // 排除正文超长字段
         wrapper.select(Article.class, info -> !info.getProperty().equals("content"));
 
-        // 精准匹配状态与分类
+        // 精准匹配分类
         wrapper.eq(query.getCategoryId() != null, Article::getCategoryId, query.getCategoryId());
+
+        // 获取目标标签ID列表
+        Set<Long> targetTagIds = new HashSet<>();
+        if (query.getTagIds() != null && !query.getTagIds().isEmpty()) {
+            targetTagIds.addAll(query.getTagIds());
+        }
+
+        if (!targetTagIds.isEmpty()) {
+            // 完全匹配
+            if (Boolean.TRUE.equals(query.getMatchAllTags())) {
+                for (Long tagId : targetTagIds) {
+                    wrapper.exists(
+                            "SELECT 1 FROM article_tag at WHERE at.article_id = article.id AND at.tag_id = {0}",
+                            tagId);
+                }
+            } else {
+                // 匹配其一
+                String tagIdsStr = targetTagIds.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(","));
+                wrapper.exists("SELECT 1 FROM article_tag at WHERE at.article_id = article.id AND at.tag_id IN ("
+                        + tagIdsStr + ")");
+            }
+        }
+
         wrapper.eq(query.getStatus() != null, Article::getStatus, query.getStatus());
 
         // 模糊匹配标题与摘要
@@ -94,6 +122,8 @@ public class ArticleServiceImpl implements ArticleService {
                 .toList();
         // 批量取回所有文章的最新浏览量
         fillRealtimeViewCounts(voList);
+        // 批量取回所有文章的最新标签
+        fillArticleTags(voList);
 
         return PageResult.<ArticleListItemVO>builder()
                 .records(voList)
@@ -158,7 +188,16 @@ public class ArticleServiceImpl implements ArticleService {
         article.setViewCount(latestViewCount);
 
         Category category = categoryService.getCategoryById(article.getCategoryId());
-        return ArticleDetailVO.from(article, category.getName());
+
+        // 获取绑定的标签列表
+        List<Long> tagIds = articleTagMapper.selectList(new LambdaQueryWrapper<ArticleTag>()
+                .eq(ArticleTag::getArticleId, id))
+                .stream()
+                .map(ArticleTag::getTagId)
+                .toList();
+        List<Tag> tags = tagService.getTagsByIds(tagIds);
+
+        return ArticleDetailVO.from(article, category.getName(), tags);
     }
 
     /**
@@ -333,4 +372,49 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
+    /**
+     * 批量获取并装配文章列表的标签数据
+     *
+     * @param voList 分页文章 VO 列表
+     */
+    private void fillArticleTags(List<ArticleListItemVO> voList) {
+        if (voList == null || voList.isEmpty()) {
+            return;
+        }
+        // 获取所有文章ID列表
+        List<Long> articleIds = voList.stream()
+                .map(a -> Long.parseLong(a.getId()))
+                .toList();
+        // 获取所有文章标签关联记录
+        List<ArticleTag> articleTags = articleTagMapper.selectList(new LambdaQueryWrapper<ArticleTag>()
+                .in(ArticleTag::getArticleId, articleIds));
+
+        // 如果没有关联记录，直接返回空列表
+        if (articleTags == null || articleTags.isEmpty()) {
+            return;
+        }
+        // 获取所有标签ID列表并去重
+        Set<Long> tagIds = articleTags.stream()
+                .map(ArticleTag::getTagId)
+                .distinct()
+                .collect(Collectors.toSet());
+        // 获取 id 实体映射表
+        Map<Long, Tag> tagMap = tagService.getTagMapByIds(tagIds);
+
+        // 构建文章标签映射表
+        Map<Long, List<Long>> articleToTagIds = articleTags.stream()
+                .collect(Collectors.groupingBy(ArticleTag::getArticleId,
+                        Collectors.mapping(ArticleTag::getTagId, Collectors.toList())));
+
+        // 遍历文章 VO 列表，装配标签数据
+        for (ArticleListItemVO vo : voList) {
+            Long articleId = Long.parseLong(vo.getId());
+            List<Long> tagIdList = articleToTagIds.getOrDefault(articleId, List.of());
+            List<Tag> tags = tagIdList.stream()
+                    .map(tagMap::get)
+                    .filter(Objects::nonNull)
+                    .toList();
+            vo.setTags(tags);
+        }
+    }
 }

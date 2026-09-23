@@ -1,6 +1,7 @@
 package com.nep.article.dto;
 
 import java.io.Serial;
+import java.util.List;
 
 import com.nep.common.page.PageQuery;
 
@@ -35,6 +36,9 @@ public class ArticlePageQuery extends PageQuery {
 
     @Size(max = 20, message = "排序字段名称过长")
     private String sortBy;
+
+    private List<@Positive(message = "标签ID必须为正整数") Long> tagIds;
+    private Boolean matchAllTags = false;
 
     private Boolean isAsc = false;
 }
