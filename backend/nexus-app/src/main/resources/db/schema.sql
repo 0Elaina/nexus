@@ -100,30 +100,30 @@ VALUES (
         1
     );
 
--- 插入默认普通用户测试账号 (用户名: testuser, 初始密码: admin123)
+/* -- 插入默认普通用户测试账号 (用户名: testuser, 初始密码: admin123)
 -- 用于开发阶段直接验证前台普通用户登录、权限隔离与防越权
 INSERT IGNORE INTO
-    sys_user (
-        id,
-        username,
-        password,
-        nickname,
-        avatar,
-        email,
-        role,
-        status
-    )
+sys_user (
+id,
+username,
+password,
+nickname,
+avatar,
+email,
+role,
+status
+)
 VALUES (
-        2,
-        'testuser',
-        '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2',
-        '普通测试用户',
-        'https://api.dicebear.com/7.x/bottts/svg?seed=nexus-user',
-        'user@nexus.blog',
-        'ROLE_USER',
-        1
-    );
-
+2,
+'testuser',
+'$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2',
+'普通测试用户',
+'https://api.dicebear.com/7.x/bottts/svg?seed=nexus-user',
+'user@nexus.blog',
+'ROLE_USER',
+1
+);
+*/
 -- 创建标签表 (tag)
 CREATE TABLE IF NOT EXISTS tag (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '标签主键ID',
@@ -134,9 +134,19 @@ CREATE TABLE IF NOT EXISTS tag (
 
 -- 插入默认初始标签（使用 INSERT IGNORE 保证重启幂等，指定时间初始值）
 INSERT IGNORE INTO
-    tag (id, name, created_at, updated_at)
+    tag (
+        id,
+        name,
+        created_at,
+        updated_at
+    )
 VALUES (1, 'Java', NOW(), NOW()),
-    (2, 'Spring Boot', NOW(), NOW()),
+    (
+        2,
+        'Spring Boot',
+        NOW(),
+        NOW()
+    ),
     (3, 'Redis', NOW(), NOW()),
     (4, 'React', NOW(), NOW());
 
@@ -146,8 +156,8 @@ CREATE TABLE IF NOT EXISTS article_tag (
     article_id BIGINT NOT NULL COMMENT '关联文章ID',
     tag_id BIGINT NOT NULL COMMENT '关联标签ID',
 
-    -- 复合唯一索引：防止重复绑定，且天然加速以 article_id 为条件的查询
-    UNIQUE KEY uk_article_tag (article_id, tag_id),
+-- 复合唯一索引：防止重复绑定，且天然加速以 article_id 为条件的查询
+UNIQUE KEY uk_article_tag (article_id, tag_id),
     -- 单列索引：加速根据 tag_id 反查关联文章
     INDEX idx_tag_id (tag_id)
 );

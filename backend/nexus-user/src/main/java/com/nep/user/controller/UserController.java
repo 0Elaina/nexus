@@ -2,18 +2,14 @@ package com.nep.user.controller;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nep.common.annotation.RequireRole;
 import com.nep.common.api.Result;
-import com.nep.user.dto.UserRegisterDTO;
 import com.nep.user.service.UserService;
 import com.nep.user.vo.UserVO;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -33,10 +29,10 @@ public class UserController {
      * @param dto 用户注册DTO
      * @return 用户VO
      */
-    @PostMapping("/register")
+/*     @PostMapping("/register")
     public Result<UserVO> register(@Valid @RequestBody UserRegisterDTO dto) {
         return Result.success(userService.register(dto));
-    }
+    } */
 
     /**
      * 获取当前登录用户信息
