@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nep.common.annotation.RequireRole;
 import com.nep.common.api.Result;
 import com.nep.user.service.UserService;
+import com.nep.user.vo.BloggerProfileVO;
 import com.nep.user.vo.UserVO;
 
 import lombok.RequiredArgsConstructor;
@@ -29,10 +30,12 @@ public class UserController {
      * @param dto 用户注册DTO
      * @return 用户VO
      */
-/*     @PostMapping("/register")
-    public Result<UserVO> register(@Valid @RequestBody UserRegisterDTO dto) {
-        return Result.success(userService.register(dto));
-    } */
+    /*
+     * @PostMapping("/register")
+     * public Result<UserVO> register(@Valid @RequestBody UserRegisterDTO dto) {
+     * return Result.success(userService.register(dto));
+     * }
+     */
 
     /**
      * 获取当前登录用户信息
@@ -43,5 +46,15 @@ public class UserController {
     @GetMapping("/me")
     public Result<UserVO> getCurrentUser() {
         return Result.success(userService.getCurrentUserInfo());
+    }
+
+    /**
+     * 获取博主公开名片
+     *
+     * @return 博主公开名片
+     */
+    @GetMapping("/blogger")
+    public Result<BloggerProfileVO> getBloggerProfile() {
+        return Result.success(userService.getBloggerProfile());
     }
 }

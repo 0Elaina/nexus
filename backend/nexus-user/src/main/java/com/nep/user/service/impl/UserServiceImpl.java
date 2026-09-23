@@ -14,6 +14,7 @@ import com.nep.user.dto.UserRegisterDTO;
 import com.nep.user.entity.SysUser;
 import com.nep.user.mapper.SysUserMapper;
 import com.nep.user.service.UserService;
+import com.nep.user.vo.BloggerProfileVO;
 import com.nep.user.vo.UserVO;
 
 import lombok.RequiredArgsConstructor;
@@ -72,5 +73,23 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ApiCode.UNAUTHORIZED);
         }
         return UserVO.from(user);
+    }
+
+    /**
+     * 获取博主公开名片
+     *
+     * @return 博主公开名片视图对象
+     */
+    @Override
+    public BloggerProfileVO getBloggerProfile() {
+        SysUser admin = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+                .eq(SysUser::getRole, SysUser.ROLE_ADMIN)
+                .eq(SysUser::getStatus, SysUser.STATUS_NORMAL)
+                .orderByAsc(SysUser::getId)
+                .last("LIMIT 1"));
+        if (admin == null) {
+            throw new BusinessException(UserApiCode.USER_NOT_FOUND);
+        }
+        return BloggerProfileVO.from(admin);
     }
 }

@@ -36,4 +36,9 @@ public final class UserApiCode {
             HttpStatus.TOO_MANY_REQUESTS,
             "ACCOUNT_LOCKED",
             "密码连续输错次数过多，账号已锁定 15 分钟");
+
+    public static final ApiCode USER_NOT_FOUND = new ApiCode(
+            HttpStatus.NOT_FOUND,
+            "USER_NOT_FOUND",
+            "用户或博主信息不存在");
 }

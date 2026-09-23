@@ -313,6 +313,27 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     /**
+     * 获取已发布文章总数
+     *
+     * @return 已发布文章总数
+     */
+    @Override
+    public Long getPublishedArticleCount() {
+        return articleMapper.selectCount(new LambdaQueryWrapper<Article>()
+                .eq(Article::getStatus, Article.STATUS_PUBLISHED));
+    }
+
+    /**
+     * 获取全站文章总浏览量
+     *
+     * @return 全站文章总浏览量
+     */
+    @Override
+    public Long getTotalViewCount() {
+        return articleMapper.selectTotalViewCount();
+    }
+
+    /**
      * 绑定文章标签
      * 
      * @param articleId 文章ID

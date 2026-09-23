@@ -46,4 +46,18 @@ public interface ArticleService {
      * @param id 文章主键 ID
      */
     void deleteArticle(Long id);
+
+    /**
+     * 获取已发布文章总数
+     *
+     * @return 已发布文章总数
+     */
+    Long getPublishedArticleCount();
+
+    /**
+     * 获取全站文章总浏览量
+     *
+     * @return 全站文章总浏览量
+     */
+    Long getTotalViewCount();
 }
