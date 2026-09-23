@@ -2,6 +2,8 @@ import React from 'react'
 import { motion } from 'motion/react'
 import { ArrowDown, Sparkles, BookOpen, Compass, Feather } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/store/authStore'
+import { useBloggerProfileQuery } from '@/features/user/api/userApi'
+import { useSiteStatsQuery } from '@/features/site/api/siteApi'
 import { MOTION_CONFIG } from '@/config/motion'
 
 interface DawnHeroStageProps {
@@ -16,13 +18,15 @@ export const DawnHeroStage: React.FC<DawnHeroStageProps> = ({
   onOpenLogin,
 }) => {
   const { isAuthenticated, isAuthorMode, toggleAuthorMode } = useAuthStore()
+  const { data: blogger } = useBloggerProfileQuery()
+  const { data: stats } = useSiteStatsQuery()
 
   return (
     <section className="relative min-h-[86vh] flex flex-col items-center justify-center pt-24 pb-16 px-6 text-center select-none">
       {/* 晨曦漫射天光柔晕 (Atmospheric Light Core) */}
-      <div 
-        aria-hidden="true" 
-        className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-[680px] h-[460px] bg-gradient-to-b from-sky-200/40 via-amber-100/30 to-transparent blur-3xl rounded-full -z-10"
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-170 h-115 bg-linear-to-b from-sky-200/40 via-amber-100/30 to-transparent blur-3xl rounded-full -z-10"
       />
 
       {/* 01. 博主人物印章徽记 (Blogger Avatar Stamp with Soft Neumorphic Glass) */}
@@ -35,24 +39,24 @@ export const DawnHeroStage: React.FC<DawnHeroStageProps> = ({
         <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1.5 soft-glass-panel shadow-diffuse-md">
           <div className="w-full h-full rounded-full overflow-hidden bg-white/90 border border-white/80 relative">
             <img
-              src="/assets/g12.jpg"
-              alt="博主印章"
+              src={blogger?.avatar || '/assets/g12.jpg'}
+              alt={blogger?.nickname ? `${blogger.nickname}的印章` : '博主印章'}
               className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
               onError={(e) => {
-                // 优雅降级：若用户尚未拷贝图片，呈递柔和和纸图腾
+                // 优雅降级：若用户尚未配置图片，呈递柔和和纸图腾
                 e.currentTarget.style.display = 'none'
               }}
             />
             {/* 降级备用纯粹和纸徽记 */}
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-sky-50 to-amber-50 text-stone-600 font-zen font-bold text-2xl">
-              N
+            <div className="w-full h-full flex items-center justify-center bg-linear-to-tr from-sky-50 to-amber-50 text-stone-600 font-zen font-bold text-2xl">
+              {blogger?.nickname ? blogger.nickname[0].toUpperCase() : 'N'}
             </div>
           </div>
         </div>
 
         {/* 呼吸状态小光标 */}
-        <div 
-          className="absolute bottom-1 right-2 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm flex items-center justify-center" 
+        <div
+          className="absolute bottom-1 right-2 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm flex items-center justify-center"
           title="站点运行中 · 在线"
         >
           <div className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
@@ -68,7 +72,9 @@ export const DawnHeroStage: React.FC<DawnHeroStageProps> = ({
       >
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/60 border border-stone-200/60 shadow-diffuse-sm text-[11px] font-mono tracking-cold text-stone-600">
           <Sparkles className="w-3 h-3 text-amber-500" />
-          <span>00 / PROLOGUE · 序幕</span>
+          <span>
+            00 / PROLOGUE · {blogger?.nickname ? `${blogger.nickname} 的手帖序幕` : '序幕'}
+          </span>
         </div>
 
         <h1 className="font-zen text-3xl sm:text-5xl font-extrabold text-stone-900 tracking-tight leading-tight text-glow-soft">
@@ -80,23 +86,27 @@ export const DawnHeroStage: React.FC<DawnHeroStageProps> = ({
         </p>
       </motion.div>
 
-      {/* 03. 生活温度状态行 (Living Status Line) */}
+      {/* 03. 生活温度与全站宏观数据状态行 (Living Status & Stats Line) */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...MOTION_CONFIG.ENTRANCE_TRANSITION, delay: 0.2 }}
-        className="mt-6 inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 px-4 py-2 rounded-full soft-glass-card text-xs text-stone-600 font-mono shadow-diffuse-sm"
+        className="mt-6 inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3.5 px-4 py-2 rounded-full soft-glass-card text-xs text-stone-600 font-mono shadow-diffuse-sm"
       >
         <span className="flex items-center gap-1.5">
           <span className="text-rose-400">🌸</span> sakura: drifting
         </span>
         <span className="text-stone-300">·</span>
-        <span className="flex items-center gap-1.5">
-          <span className="text-amber-500">☕</span> tea: warm
+        <span className="flex items-center gap-1.5 text-stone-700">
+          <span className="text-amber-500">📖</span> {stats?.articleCount ?? 0} 篇章
         </span>
         <span className="text-stone-300">·</span>
-        <span className="flex items-center gap-1.5">
-          <span className="text-blue-500">💻</span> thoughts: flowing
+        <span className="flex items-center gap-1.5 text-stone-700">
+          <span className="text-emerald-500">🏷️</span> {stats?.tagCount ?? 0} 印章
+        </span>
+        <span className="text-stone-300">·</span>
+        <span className="flex items-center gap-1.5 font-semibold text-sky-600">
+          <span className="text-sky-500">👁️</span> {stats?.totalViewCount ?? 0} 次翻阅
         </span>
         <span className="text-stone-300">·</span>
         <span className="flex items-center gap-1.5 font-semibold text-emerald-600">
@@ -162,3 +172,5 @@ export const DawnHeroStage: React.FC<DawnHeroStageProps> = ({
     </section>
   )
 }
+
+export default DawnHeroStage

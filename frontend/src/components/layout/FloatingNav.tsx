@@ -4,6 +4,7 @@ import { motion } from 'motion/react'
 import { Sparkles, FolderTree, FileText, KeyRound, LogOut, Eye, Wrench } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { AuthorLoginModal } from '@/features/auth/components/AuthorLoginModal'
+import { useLogoutMutation } from '@/features/auth/api/authApi'
 import { MOTION_CONFIG } from '@/config/motion'
 import { toast } from 'sonner'
 
@@ -12,8 +13,9 @@ export function FloatingNav() {
   const [liveTime, setLiveTime] = useState('')
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
-  const { token, isAuthorMode, toggleAuthorMode, clearAuth } = useAuthStore()
+  const { token, isAuthorMode, toggleAuthorMode } = useAuthStore()
   const isAuthenticated = Boolean(token)
+  const logoutMutation = useLogoutMutation()
 
   useEffect(() => {
     const updateTime = () => {
@@ -48,9 +50,13 @@ export function FloatingNav() {
     },
   ]
 
-  const handleLogout = () => {
-    clearAuth()
-    toast.info('已退出博主模式，回到纯净访客视点')
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync()
+      toast.info('已安全注销并退出工坊，回到纯净访客视点')
+    } catch {
+      toast.info('已退出工坊模式')
+    }
   }
 
   return (

@@ -70,7 +70,7 @@ export function AuthorLoginModal({ open, isOpen, onOpenChange, onClose }: Author
 
   return (
     <Dialog open={isModalOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[400px] p-6 rounded-card border border-white/80 bg-white/95 backdrop-blur-xl shadow-2xl">
+      <DialogContent className="sm:max-w-100 p-6 rounded-card border border-white/80 bg-white/95 backdrop-blur-xl shadow-2xl">
         <DialogHeader className="pb-2">
           <div className="w-10 h-10 rounded-full bg-stone-900 text-white flex items-center justify-center mb-2 shadow-xs">
             <KeyRound className="w-5 h-5 text-accent-amber" />

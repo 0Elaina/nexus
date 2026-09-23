@@ -47,7 +47,7 @@ export const CategoryFolioShowcase: React.FC = () => {
   }
 
   return (
-    <section id="folios" className="py-16 px-6 max-w-[1120px] mx-auto space-y-10">
+    <section id="folios" className="py-16 px-6 max-w-stage-max mx-auto space-y-10">
       {/* 栏目文学标题 */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-stone-200/60 pb-5">
         <div className="space-y-1.5">
@@ -100,7 +100,7 @@ export const CategoryFolioShowcase: React.FC = () => {
             transition={{ ...MOTION_CONFIG.ENTRANCE_TRANSITION, delay: index * 0.06 }}
             whileHover={{ y: -3 }}
             onClick={() => navigate('/categories')}
-            className="group cursor-pointer relative p-5 rounded-2xl soft-glass-panel border border-white/80 hover:border-white shadow-diffuse-sm hover:shadow-diffuse-md transition-all flex flex-col justify-between min-h-[170px]"
+            className="group cursor-pointer relative p-5 rounded-2xl soft-glass-panel border border-white/80 hover:border-white shadow-diffuse-sm hover:shadow-diffuse-md transition-all flex flex-col justify-between min-h-42.5"
           >
             {/* 顶栏：藏书票打孔与 Slug 冷标 */}
             <div className="flex items-start justify-between">

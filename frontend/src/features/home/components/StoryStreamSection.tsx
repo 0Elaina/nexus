@@ -9,39 +9,45 @@ import type { ArticleListItemVO } from '@/features/article/types'
 
 // 优雅的默认启幕篇章数据（当后端尚无足够文章时保障画卷视觉丰满）
 const DEFAULT_HEADLINE: ArticleListItemVO = {
-  id: 1,
+  id: '1',
   title: 'Nexus 工坊启幕：关于这座数字庭院的物语与工程构想',
-  summary: '从 Vue 3 迁移到 React 19，我们彻底推翻了机械表格的枷锁，将二次元物语灵魂、漫画跨页分镜与苹果级微距物理学融为一体，构建出这片具有生活温度的创作场域。',
-  categoryId: 1,
+  summary:
+    '从 Vue 3 迁移到 React 19，我们彻底推翻了机械表格的枷锁，将二次元物语灵魂、漫画跨页分镜与苹果级微距物理学融为一体，构建出这片具有生活温度的创作场域。',
+  categoryId: '1',
   categoryName: '架构沉思',
   status: 1,
-  views: 328,
-  createTime: '2026-09-21 14:00',
-  updateTime: '2026-09-21 14:00',
+  viewCount: 328,
+  tags: [{ id: 1, name: 'React 19' }, { id: 2, name: '物语设计' }],
+  createdAt: '2026-09-21 14:00',
+  updatedAt: '2026-09-21 14:00',
 }
 
 const DEFAULT_CHAPTERS: ArticleListItemVO[] = [
   {
-    id: 2,
+    id: '2',
     title: '流体空间重力学：如何打破三列卡片的公式化桎梏',
-    summary: '天际线通透保护、核心路标与物性外设的抽屉隐喻分权，以及在现代 Web 中如何借助 SwiftUI 弹簧动力学实现纯粹安定阅读态。',
-    categoryId: 2,
+    summary:
+      '天际线通透保护、核心路标与物性外设的抽屉隐喻分权，以及在现代 Web 中如何借助 SwiftUI 弹簧动力学实现纯粹安定阅读态。',
+    categoryId: '2',
     categoryName: '设计工艺',
     status: 1,
-    views: 194,
-    createTime: '2026-09-20 18:30',
-    updateTime: '2026-09-20 18:30',
+    viewCount: 194,
+    tags: [{ id: 3, name: '空间重力学' }],
+    createdAt: '2026-09-20 18:30',
+    updatedAt: '2026-09-20 18:30',
   },
   {
-    id: 3,
+    id: '3',
     title: 'Spring Boot 模块单体与 Redis 旁路缓存演进手记',
-    summary: '从单一应用解耦为业务垂直切片，StringRedisTemplate 强类型防击穿治理与 @RequireRole AOP 声明式鉴权的闭环工程实践。',
-    categoryId: 1,
+    summary:
+      '从单一应用解耦为业务垂直切片，StringRedisTemplate 强类型防击穿治理与 @RequireRole AOP 声明式鉴权的闭环工程实践。',
+    categoryId: '1',
     categoryName: '架构沉思',
     status: 1,
-    views: 246,
-    createTime: '2026-09-19 21:15',
-    updateTime: '2026-09-19 21:15',
+    viewCount: 246,
+    tags: [{ id: 4, name: 'Spring Boot' }, { id: 5, name: 'Redis' }],
+    createdAt: '2026-09-19 21:15',
+    updatedAt: '2026-09-19 21:15',
   },
 ]
 
@@ -58,7 +64,7 @@ export const StoryStreamSection: React.FC = () => {
   const subsequentArticles = realArticles.length > 1 ? realArticles.slice(1) : DEFAULT_CHAPTERS
 
   return (
-    <section id="stories" className="py-16 px-6 max-w-[1120px] mx-auto space-y-10">
+    <section id="stories" className="py-16 px-6 max-w-stage-max mx-auto space-y-10">
       {/* 栏目文学双语主标 */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-stone-200/60 pb-5">
         <div className="space-y-1.5">
@@ -78,9 +84,9 @@ export const StoryStreamSection: React.FC = () => {
         {isAuthorMode && (
           <motion.button
             type="button"
-            onClick={() => navigate('/articles')}
+            onClick={() => navigate('/articles/write')}
             whileTap={{ scale: MOTION_CONFIG.TAP_SCALE }}
-            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-stone-900 text-xs font-semibold shadow-sm transition-colors"
+            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-stone-900 text-xs font-semibold shadow-sm transition-colors apple-haptic"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>撰写新篇章</span>
@@ -95,12 +101,12 @@ export const StoryStreamSection: React.FC = () => {
         viewport={{ once: true, margin: '-50px' }}
         transition={MOTION_CONFIG.ENTRANCE_TRANSITION}
         whileHover={{ y: -3 }}
-        onClick={() => navigate(`/articles`)}
+        onClick={() => navigate(`/articles/${headlineArticle.id}`)}
         className="group cursor-pointer relative rounded-2xl overflow-hidden soft-glass-panel border border-white/80 shadow-diffuse-lg transition-all duration-300"
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
           {/* 左极 7 列：21:9 ~ 16:9 漫画画幅插画 (g4.jpg) */}
-          <div className="lg:col-span-7 relative h-64 sm:h-80 lg:h-[380px] overflow-hidden bg-stone-900">
+          <div className="lg:col-span-7 relative h-64 sm:h-80 lg:h-95 overflow-hidden bg-stone-900">
             <img
               src="/assets/g4.jpg"
               alt="头条篇章分镜插画"
@@ -111,7 +117,7 @@ export const StoryStreamSection: React.FC = () => {
               }}
             />
             {/* 渐变遮罩保护文本 */}
-            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent lg:hidden" />
+            <div className="absolute inset-0 bg-linear-to-t from-stone-950/70 via-transparent to-transparent lg:hidden" />
             <div className="absolute top-4 left-4 z-10">
               <span className="washi-seal washi-seal-indigo shadow-md font-zen">
                 ★ 卷首头条
@@ -127,7 +133,7 @@ export const StoryStreamSection: React.FC = () => {
                   {headlineArticle.categoryName}
                 </span>
                 <span className="text-[11px] font-mono text-stone-400">
-                  {headlineArticle.createTime?.split(' ')[0]}
+                  {headlineArticle.createdAt?.split('T')[0] || headlineArticle.createdAt?.split(' ')[0]}
                 </span>
               </div>
 
@@ -146,7 +152,7 @@ export const StoryStreamSection: React.FC = () => {
                   <Clock className="w-3.5 h-3.5" /> 5 min read
                 </span>
                 <span className="flex items-center gap-1">
-                  <Eye className="w-3.5 h-3.5" /> {headlineArticle.views}
+                  <Eye className="w-3.5 h-3.5" /> {headlineArticle.viewCount} 次翻阅
                 </span>
               </div>
 
@@ -169,7 +175,7 @@ export const StoryStreamSection: React.FC = () => {
             viewport={{ once: true, margin: '-30px' }}
             transition={{ ...MOTION_CONFIG.ENTRANCE_TRANSITION, delay: index * 0.08 }}
             whileHover={{ y: -3 }}
-            onClick={() => navigate('/articles')}
+            onClick={() => navigate(`/articles/${article.id}`)}
             className="group cursor-pointer p-6 rounded-2xl soft-glass-card border border-white/70 hover:border-white shadow-diffuse-sm hover:shadow-diffuse-md transition-all flex flex-col justify-between space-y-4"
           >
             <div className="space-y-2.5">
@@ -183,7 +189,13 @@ export const StoryStreamSection: React.FC = () => {
                   </span>
                 </div>
                 {isAuthorMode && (
-                  <span className="text-[11px] font-mono text-amber-700 hover:text-amber-800 flex items-center gap-0.5">
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/articles/edit/${article.id}`)
+                    }}
+                    className="text-[11px] font-mono text-amber-700 hover:text-amber-800 flex items-center gap-0.5"
+                  >
                     <Edit3 className="w-3 h-3" /> 编辑
                   </span>
                 )}
@@ -200,10 +212,10 @@ export const StoryStreamSection: React.FC = () => {
 
             <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400 font-mono">
               <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> {article.createTime?.split(' ')[0]}
+                <Calendar className="w-3 h-3" /> {article.createdAt?.split('T')[0] || article.createdAt?.split(' ')[0]}
               </span>
               <span className="flex items-center gap-1">
-                <Eye className="w-3 h-3" /> {article.views} 次翻阅
+                <Eye className="w-3 h-3" /> {article.viewCount} 次翻阅
               </span>
             </div>
           </motion.article>
@@ -212,3 +224,5 @@ export const StoryStreamSection: React.FC = () => {
     </section>
   )
 }
+
+export default StoryStreamSection
